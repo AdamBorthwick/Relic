@@ -169,7 +169,8 @@ function Collectible({
   // Gyroscope tilt (mobile): request permission on first tap, then driven by
   // device orientation — physically tilting the phone tilts the card.
   // Touch-drag stays as the fallback for desktop / no-orientation devices.
-  const gyroActiveRef = useColRef(false);
+  const gyroActiveRef  = useColRef(false);
+  const gyroMovingRef  = useColRef(false); // true once events actually fire
   const gyroCleanupRef = useColRef(null);
   const startGyro = React.useCallback(async () => {
     if (gyroActiveRef.current || mode !== 'tilt') return;
@@ -181,15 +182,26 @@ function Collectible({
     } catch { return; }
     gyroActiveRef.current = true;
     onGyroActive && onGyroActive();
+    // Smoothed target values — exponential filter kills sensor jitter
+    let spx = 0.5, spy = 0.5, rafId = null;
     const handler = (e) => {
-      if (!tiltRef.current) return;
-      // gamma: left-right tilt −45..45°; beta: front-back 15..75° (natural hold range)
-      const px = Math.max(0, Math.min(1, ((e.gamma || 0) + 45) / 90));
-      const py = Math.max(0, Math.min(1, ((e.beta  || 45) - 15) / 60));
-      tilt(px, py);
+      gyroMovingRef.current = true;
+      // gamma: left-right −30..30°; beta: front-back, natural hold ~75° → center, ±30° range
+      const rawPx = Math.max(0, Math.min(1, ((e.gamma || 0) + 30) / 60));
+      const rawPy = Math.max(0, Math.min(1, ((e.beta  || 75) - 45) / 60));
+      spx += (rawPx - spx) * 0.18;
+      spy += (rawPy - spy) * 0.18;
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (tiltRef.current) tilt(spx, spy);
+      });
     };
-    window.addEventListener('deviceorientation', handler);
-    gyroCleanupRef.current = () => window.removeEventListener('deviceorientation', handler);
+    window.addEventListener('deviceorientation', handler, { passive: true });
+    gyroCleanupRef.current = () => {
+      window.removeEventListener('deviceorientation', handler);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [mode, onGyroActive]);
   // Auto-activate on Android — no permission prompt needed
   React.useEffect(() => {
@@ -214,7 +226,7 @@ function Collectible({
          Math.min(1, Math.max(0, (p.clientY - r.top) / r.height)));
   };
   const onTiltLeave = () => {
-    if (gyroActiveRef.current) return; // gyro keeps driving; don't snap to rest
+    if (gyroActiveRef.current && gyroMovingRef.current) return; // gyro is actively driving
     cardBounds.current = null; // invalidate so next enter re-measures
     const el = tiltRef.current; if (!el) return;
     el.classList.remove('is-active');
