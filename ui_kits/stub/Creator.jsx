@@ -865,7 +865,7 @@ function CardView({ code }) {
   const [state, setState] = useCr(null);
   const [err, setErr]     = useCr(false);
   const { maxW, maxH }    = useCardSize(48);
-  const hasGyro = !!window.DeviceOrientationEvent;
+  const hasGyro = navigator.maxTouchPoints > 0;
   const [gyroOn, setGyroOn] = useCr(false);
   const toggleGyro = async () => {
     if (gyroOn) { setGyroOn(false); return; }
