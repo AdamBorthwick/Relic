@@ -57,6 +57,7 @@ function Collectible({
   image, aspect = 0.72, cutout = false, holo = 'none', fxLevel = 50,
   texts = [], qr = null, selectedId = null, editable = false, mode = 'static',
   onSelectText, onMoveText, onResizeText, onEditText, onBlankClick,
+  onGyroActive,
   maxW = 300, maxH = 430,
 }) {
   const tiltRef = useColRef(null);
@@ -179,6 +180,7 @@ function Collectible({
       }
     } catch { return; }
     gyroActiveRef.current = true;
+    onGyroActive && onGyroActive();
     const handler = (e) => {
       if (!tiltRef.current) return;
       // gamma: left-right tilt −45..45°; beta: front-back 15..75° (natural hold range)
@@ -188,7 +190,13 @@ function Collectible({
     };
     window.addEventListener('deviceorientation', handler);
     gyroCleanupRef.current = () => window.removeEventListener('deviceorientation', handler);
-  }, [mode]);
+  }, [mode, onGyroActive]);
+  // Auto-activate on Android — no permission prompt needed
+  React.useEffect(() => {
+    if (mode !== 'tilt' || !window.DeviceOrientationEvent) return;
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
+    startGyro();
+  }, [mode, startGyro]);
   React.useEffect(() => () => { if (gyroCleanupRef.current) gyroCleanupRef.current(); }, []);
 
   const onTiltEnter = () => {

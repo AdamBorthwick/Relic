@@ -333,7 +333,7 @@
 .cc-stage { display: flex; align-items: center; justify-content: center; padding: 18px 0 8px; flex: 0 0 auto; }
 
 /* ---------- collectible ---------- */
-.cc { perspective: 1100px; user-select: none; -webkit-user-select: none; }
+.cc { perspective: 1100px; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .cc img, .cc canvas { pointer-events: none; -webkit-touch-callout: none; }
 .cc__tilt {
   touch-action: none;
@@ -684,7 +684,7 @@
 /* preview fills the whole screen BEHIND the floating header/panel; the card is
    centered in the gap via top (header) + bottom (panel) padding, so recentering
    on collapse is a smooth padding transition that never clips the card */
-.wiz--fx > .wiz__preview { position: absolute; inset: 0; z-index: 2; overflow: visible; padding-top: 62px; transition: padding-bottom .34s var(--ease); }
+.wiz--fx > .wiz__preview { position: absolute; inset: 0; z-index: 2; overflow: visible; padding-top: 62px; transition: padding .34s var(--ease); }
 /* header is a transparent overlay matching the other screens' bar exactly (12px top, 50px bar) */
 .wiz--fx > .wiz__bar { position: absolute; top: 0px; left: 0; right: 0; z-index: 4; height: 50px; padding: 0 10px; background: rgba(20,20,22,.55); backdrop-filter: blur(10px); }
 .wiz--fx > .wiz__panel { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; }
@@ -1125,6 +1125,10 @@
     opacity: 0; pointer-events: none;
     transform: translateX(20px);
   }
+  .wiz--fx.is-hide-ui > .wiz__preview {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
 }
 
 /* ============================================================
@@ -1152,10 +1156,20 @@
    CARD VIEW — shared card page (no editor chrome)
    ============================================================ */
 .card-view { position: relative; overflow: hidden; }
+.card-view .cc-bg { top: -14%; bottom: -14%; }
 .card-view__stage {
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
 }
+.card-view__tilt-hint {
+  position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%);
+  z-index: 20; display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; border-radius: 999px; white-space: nowrap;
+  background: rgba(0,0,0,.52); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.8);
+  font: 500 13px var(--font); pointer-events: none;
+}
+.card-view__tilt-hint .cds-icon { width: 15px; height: 15px; opacity: .7; }
 .card-view__cta {
   position: absolute; bottom: 24px; right: 24px; z-index: 20;
   display: inline-flex; align-items: center; gap: 6px;

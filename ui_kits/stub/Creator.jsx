@@ -47,19 +47,20 @@ async function loadCard(code) {
 
 // Dynamic card dimensions — scale down on short/narrow viewports so nothing scrolls.
 // Reserves chrome height: header (66px) + controls (140px) + padding (60px).
-function useCardSize() {
-  const [size, setSize] = useCr(() => calcSize());
+function useCardSize(reserve) {
+  const calc = () => calcSize(reserve);
+  const [size, setSize] = useCr(calc);
   React.useEffect(() => {
-    const h = () => setSize(calcSize());
+    const h = () => setSize(calc());
     window.addEventListener('resize', h);
     return () => window.removeEventListener('resize', h);
   }, []);
   return size;
 }
-function calcSize() {
+function calcSize(reserve) {
   // On mobile reserve more for the compact panel (header ~62 + panel ~160 + padding ~30)
-  const reserve = window.innerWidth < 600 ? 290 : 266;
-  const maxH = Math.max(200, Math.min(404, window.innerHeight - reserve));
+  const r = reserve != null ? reserve : (window.innerWidth < 600 ? 290 : 266);
+  const maxH = Math.max(200, Math.min(404, window.innerHeight - r));
   const maxW = Math.max(144, Math.min(290, Math.round(maxH * 0.725)));
   return { maxW, maxH };
 }
@@ -521,7 +522,7 @@ function Creator() {
               <div className="upload-link-input-row">
                 <input
                   className="upload-link-input"
-                  placeholder="Paste a collectable link…"
+                  placeholder="Paste a collectible link…"
                   value={linkVal}
                   autoFocus
                   onChange={e => { setLinkVal(e.target.value); setLinkErr(null); }}
@@ -709,8 +710,8 @@ function Creator() {
         <SceneBg id={scene} live={true} />
         <div className="cc-bg__vig"></div>
         <WizBar title="Finish & background" step={3} onBack={() => setStep(2)}
-          action={<button className="wiz__next" onClick={() => setShareOpen(true)} aria-label="Share"><Icon name="share" /></button>} />
-        <div className="wiz__preview wiz__preview--bare" style={{ paddingBottom: (fxPanel ? fxPanelH : 48) + 'px' }}>
+          action={<button className="wiz__next" onClick={() => setShareOpen(true)}>Share</button>} />
+        <div className="wiz__preview wiz__preview--bare" style={{ paddingBottom: hideUI ? '0px' : (fxPanel ? fxPanelH : 48) + 'px' }}>
           <div className="cc-stage">
             <Collectible image={image} aspect={aspect} cutout={cutout} holo={holo} fxLevel={fxLevel}
               texts={texts} qr={qr} editable={false} mode="tilt" maxW={PREVIEW_W} maxH={PREVIEW_H} />
@@ -863,7 +864,10 @@ function Creator() {
 function CardView({ code }) {
   const [state, setState] = useCr(null);
   const [err, setErr]     = useCr(false);
-  const { maxW, maxH }    = useCardSize();
+  const { maxW, maxH }    = useCardSize(48);
+  const needsGyroTap = !!(window.DeviceOrientationEvent &&
+    typeof DeviceOrientationEvent.requestPermission === 'function');
+  const [tiltHint, setTiltHint] = useCr(needsGyroTap);
 
   React.useEffect(() => {
     loadCard(code)
@@ -907,10 +911,16 @@ function CardView({ code }) {
           holo={state.holo || 'none'} fxLevel={state.fxLevel ?? 50}
           texts={state.texts || []} qr={state.qr || null}
           editable={false} mode="tilt" maxW={maxW} maxH={maxH}
+          onGyroActive={() => setTiltHint(false)}
         />
       </div>
+      {tiltHint && (
+        <div className="card-view__tilt-hint">
+          <Icon name="rotate" /> Tap card to enable tilt
+        </div>
+      )}
       <a href={location.pathname} className="card-view__cta">
-        Create a collectable <Icon name="add" />
+        Create a collectible <Icon name="add" />
       </a>
     </div>
   );

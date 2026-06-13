@@ -212,7 +212,7 @@
               shad.setUniform('uTime',   p2.millis() / 1000.0);
               shad.setUniform('uAspect', p2.width / p2.height);
               var center = [0.5, 0.5];
-              var cardEl = document.querySelector('.wiz--fx .cc-stage');
+              var cardEl = document.querySelector('.wiz--fx .cc-stage') || document.querySelector('.card-view .cc-stage');
               if (cardEl && p2.canvas) {
                 var cr = cardEl.getBoundingClientRect();
                 var cvr = p2.canvas.getBoundingClientRect();
@@ -234,7 +234,7 @@
               shad.setUniform('uTime',   p2.millis() / 1000.0);
               shad.setUniform('uAspect', p2.width / p2.height);
               var center = [0.5, 0.5];
-              var cardEl = document.querySelector('.wiz--fx .cc-stage');
+              var cardEl = document.querySelector('.wiz--fx .cc-stage') || document.querySelector('.card-view .cc-stage');
               if (cardEl && p2.canvas) {
                 var cr = cardEl.getBoundingClientRect();
                 var cvr = p2.canvas.getBoundingClientRect();
@@ -257,7 +257,7 @@
               shad.setUniform('uAspect', p2.width / p2.height);
               // Card center in canvas UV — tracked live so rings always stay on the card
               var center = [0.5, 0.5];
-              var cardEl = document.querySelector('.wiz--fx .cc-stage');
+              var cardEl = document.querySelector('.wiz--fx .cc-stage') || document.querySelector('.card-view .cc-stage');
               if (cardEl && p2.canvas) {
                 var cr = cardEl.getBoundingClientRect();
                 var cvr = p2.canvas.getBoundingClientRect();
@@ -280,7 +280,7 @@
               shad.setUniform('uTime',   p2.millis() / 1000.0);
               shad.setUniform('uAspect', p2.width / p2.height);
               var center = [0.5, 0.5];
-              var cardEl = document.querySelector('.wiz--fx .cc-stage');
+              var cardEl = document.querySelector('.wiz--fx .cc-stage') || document.querySelector('.card-view .cc-stage');
               if (cardEl && p2.canvas) {
                 var cr = cardEl.getBoundingClientRect();
                 var cvr = p2.canvas.getBoundingClientRect();
