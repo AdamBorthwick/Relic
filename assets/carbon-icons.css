@@ -1,0 +1,24 @@
+/* ============================================================
+   Carbon Icons helper
+   Authentic IBM Carbon icon set (@carbon/icons, Apache-2.0),
+   vendored into assets/icons/ and injected INLINE so they
+   recolor via `fill: currentColor` and inherit text color.
+
+   Usage:
+     <span class="cds-icon" data-icon="add"></span>
+     <span class="cds-icon cds-icon--20" data-icon="search"></span>
+   ============================================================ */
+
+.cds-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+.cds-icon svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+.cds-icon--20 { width: 20px; height: 20px; }
+.cds-icon--24 { width: 24px; height: 24px; }
+.cds-icon--32 { width: 32px; height: 32px; }

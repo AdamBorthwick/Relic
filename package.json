@@ -1,0 +1,7 @@
+{
+  "name": "stub",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npx serve -l 8080 . & start http://localhost:8080/ui_kits/stub/creator.html"
+  }
+}

@@ -1,0 +1,90 @@
+/* STUB — phone shell + UI primitives */
+html, body { margin: 0; height: 100%; }
+body { background: #050506; font-family: var(--font); color: var(--text); -webkit-font-smoothing: antialiased; }
+button, [role="button"] { user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+img { -webkit-user-drag: none; user-drag: none; }
+
+#root { height: 100dvh; display: flex; flex-direction: column; }
+
+.screen { flex: 1; display: flex; flex-direction: column; background: var(--bg); min-height: 0; }
+.scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.scroll::-webkit-scrollbar { width: 0; }
+.pad { padding: 0 20px; }
+.safe-top { height: 12px; flex: 0 0 auto; }
+.safe-bottom { height: 12px; flex: 0 0 auto; }
+
+/* top app bar */
+.topbar { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 16px; flex: 0 0 auto; }
+.topbar__back { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); border: none; color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.topbar__back:hover { background: var(--surface-2); }
+.topbar__title { font-size: 16px; font-weight: 600; }
+.topbar__spacer { flex: 1; }
+.topbar__action { background: none; border: none; color: var(--accent); font: 600 15px var(--font); cursor: pointer; }
+
+/* wordmark */
+.wordmark { font-weight: 700; font-size: 19px; letter-spacing: -.5px; display: inline-flex; align-items: center; gap: 7px; }
+.wordmark .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+
+/* buttons */
+.btn { width: 100%; height: 52px; border: none; border-radius: var(--r-md); font: 600 16px var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: transform .08s var(--ease), filter .12s var(--ease); }
+.btn:active { transform: scale(.985); }
+.btn--accent { background: var(--accent); color: var(--accent-ink); }
+.btn--accent:hover { filter: brightness(1.05); }
+.btn--solid { background: var(--text); color: #111; }
+.btn--ghost { background: var(--surface-2); color: var(--text); }
+.btn--ghost:hover { background: var(--surface-3); }
+.btn--outline { background: transparent; border: 1px solid var(--border-2); color: var(--text); }
+.btn--sm { height: 42px; font-size: 14px; border-radius: var(--r-sm); }
+.btn .cds-icon { width: 18px; height: 18px; }
+
+/* sticky footer action area */
+.dock { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px 12px; background: linear-gradient(transparent, var(--bg) 32%); z-index: 40; display: flex; flex-direction: column; gap: 10px; }
+
+/* fields */
+.field { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+.field__label { font-size: 13px; color: var(--text-2); font-weight: 500; }
+.input, .textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--text); font: 16px var(--font); padding: 14px 14px; outline: none; transition: border-color .12s; box-sizing: border-box; }
+.input:focus, .textarea:focus { border-color: var(--accent); }
+.input::placeholder, .textarea::placeholder { color: var(--text-3); }
+.textarea { resize: none; line-height: 1.5; min-height: 84px; }
+.input--lg { font-size: 22px; font-weight: 600; padding: 16px 14px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.with-icon { position: relative; }
+.with-icon .cds-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-3); width: 18px; height: 18px; }
+.with-icon .input { padding-left: 42px; }
+
+/* avatars */
+.av { border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; color: #14140f; flex: 0 0 auto; font-family: var(--font); }
+.av--sm { width: 28px; height: 28px; font-size: 11px; }
+.av--md { width: 38px; height: 38px; font-size: 13px; }
+.av--lg { width: 48px; height: 48px; font-size: 16px; }
+.av-stack { display: flex; }
+.av-stack .av { border: 2px solid var(--bg); margin-left: -8px; }
+.av-stack .av:first-child { margin-left: 0; }
+.av-more { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-3); color: var(--text-2); font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; border: 2px solid var(--bg); margin-left: -8px; }
+
+/* chips */
+.chip { height: 34px; padding: 0 14px; border-radius: 17px; background: var(--surface-2); border: 1px solid transparent; color: var(--text-2); font: 14px var(--font); cursor: pointer; display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.chip.is-on { background: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.chip-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+.chip-row::-webkit-scrollbar { height: 0; }
+
+/* status pill */
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.pill .d { width: 7px; height: 7px; border-radius: 50%; }
+.pill--going  { background: rgba(95,208,138,.16); color: var(--going); }
+.pill--maybe  { background: rgba(246,201,69,.16); color: var(--maybe); }
+.pill--cant   { background: rgba(255,111,97,.16); color: var(--cant); }
+.pill--invited{ background: var(--surface-2); color: var(--text-3); }
+
+/* section label */
+.sec { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); margin: 22px 0 12px; }
+
+/* toast */
+.toast { position: absolute; left: 20px; right: 20px; bottom: 30px; background: var(--surface-3); border-radius: var(--r-md); padding: 14px 16px; font-size: 14px; display: flex; align-items: center; gap: 10px; z-index: 90; box-shadow: 0 16px 40px rgba(0,0,0,.5); animation: toastin .3s var(--ease); }
+@keyframes toastin { from { transform: translateY(16px); opacity: 0; } }
+.toast .cds-icon { color: var(--accent); }
+
+/* demo footer (outside phone) */
+.kit-foot { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); color: #55555c; font: 12px var(--font); text-align: center; }
+.kit-foot b { color: #9a9aa2; font-weight: 600; }
