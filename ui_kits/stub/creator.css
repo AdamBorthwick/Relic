@@ -1193,7 +1193,7 @@
 }
 .card-view__cta:hover { background: rgba(0,0,0,.7); transform: scale(1.03); }
 .card-view__qr-link {
-  position: absolute; bottom: 72px; left: 50%; transform: translateX(-50%); z-index: 20;
+  position: absolute; top: 70px; left: 50%; transform: translateX(-50%); z-index: 20;
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 18px; border-radius: 999px; white-space: nowrap;
   max-width: calc(100% - 48px); overflow: hidden; text-overflow: ellipsis;
@@ -1204,8 +1204,8 @@
 }
 .card-view__qr-link:hover { background: rgba(0,0,0,.7); }
 .card-view__qr-link.is-leaving { animation: qrLinkOut .35s var(--ease) both; pointer-events: none; }
-@keyframes qrLinkIn  { from { opacity: 0; transform: translateX(-50%) translateY(6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
-@keyframes qrLinkOut { from { opacity: 1; transform: translateX(-50%) translateY(0); } to { opacity: 0; transform: translateX(-50%) translateY(6px); } }
+@keyframes qrLinkIn  { from { opacity: 0; transform: translateX(-50%) translateY(-6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes qrLinkOut { from { opacity: 1; transform: translateX(-50%) translateY(0); } to { opacity: 0; transform: translateX(-50%) translateY(-6px); } }
 .card-view__cta .cds-icon { width: 15px; height: 15px; }
 .card-view__header { position: absolute; top: 22px; left: 0; right: 0; z-index: 20;
   display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }

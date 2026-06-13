@@ -44,6 +44,27 @@ async function loadCard(code) {
   if (!rows.length) throw new Error('not found');
   return rows[0].data;
 }
+async function uploadPreview(blob, code) {
+  const jpegBlob = await new Promise(resolve => {
+    const img = new Image();
+    const src = URL.createObjectURL(blob);
+    img.onload = () => {
+      const W = 630, H = Math.round(img.height * W / img.width);
+      const cv = Object.assign(document.createElement('canvas'), { width: W, height: H });
+      cv.getContext('2d').drawImage(img, 0, 0, W, H);
+      URL.revokeObjectURL(src);
+      cv.toBlob(resolve, 'image/jpeg', 0.88);
+    };
+    img.src = src;
+  });
+  if (!jpegBlob) return;
+  const buf = await jpegBlob.arrayBuffer();
+  await fetch(`${SB_URL}/storage/v1/object/previews/${code}.jpg`, {
+    method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
+    body: buf,
+  });
+}
 
 // Dynamic card dimensions — scale down on short/narrow viewports so nothing scrolls.
 // Reserves chrome height: header (66px) + controls (140px) + padding (60px).
@@ -466,6 +487,7 @@ function Creator() {
       const url   = location.origin + location.pathname + '#card=' + code;
       history.replaceState(null, '', '#card=' + code);
       setShareUrl(url);
+      makeCardBlob().then(blob => uploadPreview(blob, code)).catch(() => {});
     } catch (e) { setShareErr('Save failed — try again'); }
     setShareSaving(false);
   };
@@ -936,6 +958,11 @@ function CardView({ code }) {
           root.style.setProperty('--r-lg', r.lg); root.style.setProperty('--cc-radius', r.cc);
         }
         setState(s);
+        const previewUrl = `${SB_URL}/storage/v1/object/public/previews/${code}.jpg`;
+        const ogImg = document.querySelector('meta[property="og:image"]');
+        if (ogImg) ogImg.setAttribute('content', previewUrl);
+        const ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', (s.texts && s.texts[0]?.text) ? s.texts[0].text + ' — Relic' : 'Relic — Holographic Collectibles');
       })
       .catch(() => setErr(true));
   }, [code]);

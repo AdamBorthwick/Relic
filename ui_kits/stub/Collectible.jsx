@@ -174,17 +174,42 @@ function Collectible({
   const gyroMovingRef = useColRef(false);
   React.useEffect(() => {
     if (!gyro || mode !== 'tilt') return;
-    let rafId = null, latestPx = 0.5, latestPy = 0.5;
+    let rafId;
+    let latestPx = 0.5, latestPy = 0.5;
+    let smoothPx = 0.5, smoothPy = 0.5;
+    let hasData = false;
+    // Suppress CSS transition so JS lerp is the only smoothing
+    const el = tiltRef.current;
+    if (el) { el.classList.remove('is-resting'); el.classList.add('is-active'); el.style.transition = 'none'; }
     const handler = (e) => {
       if (e.gamma === null && e.beta === null) return;
       gyroMovingRef.current = true;
-      latestPx = Math.max(0, Math.min(1, ((e.gamma || 0) + 35) / 70));
-      latestPy = Math.max(0, Math.min(1, ((e.beta  || 70) - 35) / 70));
-      if (rafId) return;
-      rafId = requestAnimationFrame(() => { rafId = null; if (tiltRef.current) tilt(latestPx, latestPy); });
+      hasData = true;
+      latestPx = Math.max(0, Math.min(1, ((e.gamma || 0) + 45) / 90));  // ±45° gamma
+      latestPy = Math.max(0, Math.min(1, ((e.beta  || 70) - 25) / 90)); // 25–115° beta
+    };
+    const loop = () => {
+      rafId = requestAnimationFrame(loop);
+      if (!hasData) return;
+      smoothPx += (latestPx - smoothPx) * 0.08;
+      smoothPy += (latestPy - smoothPy) * 0.08;
+      const e = tiltRef.current; if (!e) return;
+      e.style.setProperty('--gx', (smoothPx * 100).toFixed(1) + '%');
+      e.style.setProperty('--gy', (smoothPy * 100).toFixed(1) + '%');
+      e.style.setProperty('--mx', (smoothPx * 100).toFixed(1) + '%');
+      e.style.setProperty('--my', (smoothPy * 100).toFixed(1) + '%');
+      e.style.setProperty('--ang', (smoothPx * 130).toFixed(0) + 'deg');
+      e.style.setProperty('--rx', ((smoothPx - 0.5) * 35).toFixed(1) + 'deg');
+      e.style.setProperty('--ry', (-(smoothPy - 0.5) * 52).toFixed(1) + 'deg');
+      setBgParallax(((smoothPx - 0.5) * -20).toFixed(1) + 'px ' + ((smoothPy - 0.5) * -20).toFixed(1) + 'px');
     };
     window.addEventListener('deviceorientation', handler, { passive: true });
-    return () => { window.removeEventListener('deviceorientation', handler); if (rafId) cancelAnimationFrame(rafId); };
+    rafId = requestAnimationFrame(loop);
+    return () => {
+      window.removeEventListener('deviceorientation', handler);
+      cancelAnimationFrame(rafId);
+      if (tiltRef.current) tiltRef.current.style.transition = '';
+    };
   }, [gyro, mode]);
 
   const onTiltEnter = () => {
