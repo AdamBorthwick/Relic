@@ -865,9 +865,7 @@ function CardView({ code }) {
   const [state, setState] = useCr(null);
   const [err, setErr]     = useCr(false);
   const { maxW, maxH }    = useCardSize(48);
-  const needsGyroTap = !!(window.DeviceOrientationEvent &&
-    typeof DeviceOrientationEvent.requestPermission === 'function');
-  const [tiltHint, setTiltHint] = useCr(needsGyroTap);
+  const [tiltHint, setTiltHint] = useCr(!!window.DeviceOrientationEvent);
 
   React.useEffect(() => {
     loadCard(code)

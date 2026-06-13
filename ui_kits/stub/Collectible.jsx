@@ -166,12 +166,9 @@ function Collectible({
   };
   const pt = (e) => (e.touches ? e.touches[0] : e);
 
-  // Gyroscope tilt (mobile): request permission on first tap, then driven by
-  // device orientation — physically tilting the phone tilts the card.
-  // Touch-drag stays as the fallback for desktop / no-orientation devices.
-  const gyroActiveRef  = useColRef(false);
-  const gyroMovingRef  = useColRef(false); // true once events actually fire
-  const gyroCleanupRef = useColRef(null);
+  // Gyroscope tilt — activated by first tap (user gesture required on all platforms).
+  const gyroActiveRef = useColRef(false);
+  const gyroMovingRef = useColRef(false);
   const startGyro = React.useCallback(async () => {
     if (gyroActiveRef.current || mode !== 'tilt') return;
     if (!window.DeviceOrientationEvent) return;
@@ -182,34 +179,21 @@ function Collectible({
     } catch { return; }
     gyroActiveRef.current = true;
     onGyroActive && onGyroActive();
-    // Smoothed target values — exponential filter kills sensor jitter
-    let spx = 0.5, spy = 0.5, rafId = null;
+    let rafId = null;
+    let latestPx = 0.5, latestPy = 0.5;
     const handler = (e) => {
+      if (e.gamma === null && e.beta === null) return;
       gyroMovingRef.current = true;
-      // gamma: left-right −30..30°; beta: front-back, natural hold ~75° → center, ±30° range
-      const rawPx = Math.max(0, Math.min(1, ((e.gamma || 0) + 30) / 60));
-      const rawPy = Math.max(0, Math.min(1, ((e.beta  || 75) - 45) / 60));
-      spx += (rawPx - spx) * 0.18;
-      spy += (rawPy - spy) * 0.18;
+      // gamma: left-right tilt; beta: front-back, natural hold ≈ 70°, ±35° range
+      latestPx = Math.max(0, Math.min(1, ((e.gamma || 0) + 35) / 70));
+      latestPy = Math.max(0, Math.min(1, ((e.beta  || 70) - 35) / 70));
       if (rafId) return;
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        if (tiltRef.current) tilt(spx, spy);
-      });
+      rafId = requestAnimationFrame(() => { rafId = null; if (tiltRef.current) tilt(latestPx, latestPy); });
     };
     window.addEventListener('deviceorientation', handler, { passive: true });
-    gyroCleanupRef.current = () => {
-      window.removeEventListener('deviceorientation', handler);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
+    return () => { window.removeEventListener('deviceorientation', handler); if (rafId) cancelAnimationFrame(rafId); };
   }, [mode, onGyroActive]);
-  // Auto-activate on Android — no permission prompt needed
-  React.useEffect(() => {
-    if (mode !== 'tilt' || !window.DeviceOrientationEvent) return;
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') return;
-    startGyro();
-  }, [mode, startGyro]);
-  React.useEffect(() => () => { if (gyroCleanupRef.current) gyroCleanupRef.current(); }, []);
+  React.useEffect(() => () => { gyroActiveRef.current = false; gyroMovingRef.current = false; }, []);
 
   const onTiltEnter = () => {
     const el = tiltRef.current; if (!el) return;
