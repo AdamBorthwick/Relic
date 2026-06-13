@@ -15,10 +15,8 @@
   <path fill="#c6f24e" filter="url(#glow)"
         transform="translate(464 306) scale(2.4) translate(-12 -16)"
         d="M12 0 L14.8 12.4 L24 16 L14.8 19.6 L12 32 L9.2 19.6 L0 16 L9.2 12.4 Z"/>
-  <text x="504" y="345" text-anchor="start" fill="#ffffff"
-        font-family="'Bricolage Grotesque', system-ui, -apple-system, sans-serif"
-        font-weight="700" font-size="108" letter-spacing="-1">Relic</text>
-  <text x="600" y="400" text-anchor="middle" fill="rgba(255,255,255,0.38)"
-        font-family="system-ui, -apple-system, sans-serif"
-        font-weight="400" font-size="22" letter-spacing="4">CREATE CUSTOM COLLECTIBLES</text>
+  <text x="504" y="345" text-anchor="start"
+        style="fill:#ffffff;font-family:system-ui,-apple-system,sans-serif;font-weight:700;font-size:108px;letter-spacing:-1px">Relic</text>
+  <text x="600" y="400" text-anchor="middle"
+        style="fill:#a7a7ad;font-family:system-ui,-apple-system,sans-serif;font-weight:400;font-size:22px;letter-spacing:4px">CREATE CUSTOM COLLECTIBLES</text>
 </svg>
