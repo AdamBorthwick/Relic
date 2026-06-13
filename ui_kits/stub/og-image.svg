@@ -20,5 +20,5 @@
         font-weight="700" font-size="108" letter-spacing="-1">Relic</text>
   <text x="600" y="400" text-anchor="middle" fill="rgba(255,255,255,0.38)"
         font-family="system-ui, -apple-system, sans-serif"
-        font-weight="400" font-size="24" letter-spacing="1">digital collectibles</text>
+        font-weight="400" font-size="22" letter-spacing="4">CREATE CUSTOM COLLECTIBLES</text>
 </svg>
