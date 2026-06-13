@@ -67,11 +67,28 @@ function calcSize(reserve) {
 
 function RelicTitle() {
   const [active, setActive] = React.useState({});
+  const [starActive, setStarActive] = React.useState(false);
   const letters = ['R', 'e', 'l', 'i', 'c'];
   const on  = (i) => setActive(a => ({ ...a, [i]: true }));
   const off = (i) => setActive(a => ({ ...a, [i]: false }));
+  const anyLetterActive = Object.values(active).some(Boolean);
+  const starLit = starActive || anyLetterActive;
   return (
     <span className="landing__title" aria-label="Relic">
+      <span className="landing__title-star" aria-hidden="true"
+        onMouseEnter={() => setStarActive(true)}
+        onMouseLeave={() => setStarActive(false)}
+        onTouchStart={(e) => { e.preventDefault(); setStarActive(true); }}
+        onTouchEnd={() => setStarActive(false)}
+      >
+        <svg viewBox="0 0 24 32" fill="currentColor" style={{
+          color: starLit ? 'var(--accent)' : 'var(--text)',
+          transform: starLit ? 'rotate(22deg) scale(1.15)' : 'rotate(0deg) scale(1)',
+          transition: starLit ? 'color .1s ease, transform .1s ease' : 'color .8s ease, transform .55s ease',
+        }}>
+          <path d="M12 0 L14.8 12.4 L24 16 L14.8 19.6 L12 32 L9.2 19.6 L0 16 L9.2 12.4 Z"/>
+        </svg>
+      </span>
       {letters.map((ch, i) => (
         <span key={i} className="landing__title-letter"
           onMouseEnter={() => on(i)}
@@ -83,9 +100,9 @@ function RelicTitle() {
         >
           <span className="landing__title-letter__sizer" aria-hidden="true">{ch}</span>
           <span className="landing__title-letter__text" style={{
-            fontVariationSettings: `'wght' ${active[i] ? 800 : 400}`,
-            color: active[i] ? 'var(--accent)' : 'var(--text)',
-            transition: active[i]
+            fontVariationSettings: `'wght' ${(active[i] || starActive) ? 800 : 400}`,
+            color: (active[i] || starActive) ? 'var(--accent)' : 'var(--text)',
+            transition: (active[i] || starActive)
               ? 'font-variation-settings .1s ease, color .1s ease'
               : 'font-variation-settings .55s ease, color .8s ease',
           }}>{ch}</span>
@@ -235,7 +252,7 @@ function Creator() {
   const [hideUI, setHideUI] = useCr(false); // step-3 desktop hide-all-UI toggle
   const fxPanelRef = useCrRef(null);
   const [fxPanelH, setFxPanelH] = useCr(250); // measured panel height (centers card above panel)
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (step === 3 && fxPanel && fxPanelRef.current) setFxPanelH(fxPanelRef.current.offsetHeight);
   }, [step, fxPanel]);
   const [fxTip, setFxTip] = useCr(null); // step-3 desktop float chip tooltip
@@ -263,6 +280,9 @@ function Creator() {
   const [styleOpen, setStyleOpen] = useCr(false);
   const [shareOpen, setShareOpen] = useCr(false);
   const [shareCopied, setShareCopied] = useCr(false);
+  const [shareCopiedLeaving, setShareCopiedLeaving] = useCr(false);
+  const shareCopiedTimer = React.useRef(null);
+  const shareCopiedLeaveTimer = React.useRef(null);
   const [shareSaving, setShareSaving] = useCr(false);
   const [shareErr, setShareErr] = useCr(null);
   const [shareUrl, setShareUrl] = useCr('');
@@ -461,7 +481,14 @@ function Creator() {
       try { document.execCommand('copy'); } catch {}
       ta.remove();
     }
+    clearTimeout(shareCopiedTimer.current);
+    clearTimeout(shareCopiedLeaveTimer.current);
+    setShareCopiedLeaving(false);
     setShareCopied(true);
+    shareCopiedTimer.current = setTimeout(() => {
+      setShareCopiedLeaving(true);
+      shareCopiedLeaveTimer.current = setTimeout(() => { setShareCopied(false); setShareCopiedLeaving(false); }, 350);
+    }, 3000);
   };
   const shareSheet = shareOpen ? (
     <div className="share-sheet" onMouseDown={(e) => { if (e.target === e.currentTarget) closeSheet(); }}>
@@ -490,7 +517,7 @@ function Creator() {
           </div>
         )}
         {shareCopied && (
-          <div className="share-copied-toast">
+          <div className={'share-copied-toast' + (shareCopiedLeaving ? ' is-leaving' : '')}>
             <Icon name="copy" /> Link copied to clipboard
           </div>
         )}
@@ -719,7 +746,7 @@ function Creator() {
         </div>
 
         {shareCopied && (
-          <div className="share-copied-toast">
+          <div className={'share-copied-toast' + (shareCopiedLeaving ? ' is-leaving' : '')}>
             <Icon name="copy" /> Link copied to clipboard
           </div>
         )}
@@ -867,6 +894,23 @@ function CardView({ code }) {
   const { maxW, maxH }    = useCardSize(48);
   const hasGyro = navigator.maxTouchPoints > 0;
   const [gyroOn, setGyroOn] = useCr(false);
+  const [qrUrl, setQrUrl] = useCr(null);
+  const [qrLeaving, setQrLeaving] = useCr(false);
+  const qrTimer = React.useRef(null);
+  const qrLeaveTimer = React.useRef(null);
+  const dismissQr = React.useCallback(() => {
+    clearTimeout(qrTimer.current);
+    setQrLeaving(true);
+    qrLeaveTimer.current = setTimeout(() => { setQrUrl(null); setQrLeaving(false); }, 350);
+  }, []);
+  const onQrDoubleTap = React.useCallback((url) => {
+    clearTimeout(qrTimer.current);
+    clearTimeout(qrLeaveTimer.current);
+    if (qrUrl) { dismissQr(); return; }
+    setQrLeaving(false);
+    setQrUrl(url);
+    qrTimer.current = setTimeout(dismissQr, 3000);
+  }, [qrUrl, dismissQr]);
   const toggleGyro = async () => {
     if (gyroOn) { setGyroOn(false); return; }
     try {
@@ -919,15 +963,21 @@ function CardView({ code }) {
           holo={state.holo || 'none'} fxLevel={state.fxLevel ?? 50}
           texts={state.texts || []} qr={state.qr || null}
           editable={false} mode="tilt" gyro={gyroOn} maxW={maxW} maxH={maxH}
+          onQrDoubleTap={state.qr ? onQrDoubleTap : null}
         />
       </div>
+      {qrUrl && (
+        <a href={qrUrl} target="_blank" rel="noopener noreferrer" className={'card-view__qr-link' + (qrLeaving ? ' is-leaving' : '')}>
+          {qrUrl}
+        </a>
+      )}
       {hasGyro && (
         <button className={'card-view__gyro-btn' + (gyroOn ? ' is-on' : '')} onClick={toggleGyro}>
-          <Icon name="rotate" /> {gyroOn ? 'Touch' : 'Gyro'}
+          <Icon name={gyroOn ? 'move' : 'mobile'} /> {gyroOn ? 'Touch controls' : 'Tilt controls'}
         </button>
       )}
       <a href={location.pathname} className="card-view__cta">
-        Create a collectible <Icon name="add" />
+        Create your own<Icon name="add" />
       </a>
     </div>
   );

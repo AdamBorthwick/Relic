@@ -552,7 +552,9 @@
   box-shadow: 0 4px 20px rgba(0,0,0,.35);
   animation: toastIn .25s var(--ease) both; pointer-events: none; }
 .share-copied-toast .cds-icon { width: 16px; height: 16px; flex: 0 0 auto; }
-@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } }
+.share-copied-toast.is-leaving { animation: toastOut .35s var(--ease) both; }
+@keyframes toastIn  { from { opacity: 0; transform: translateX(-50%) translateY(8px); } }
+@keyframes toastOut { to   { opacity: 0; transform: translateX(-50%) translateY(8px); } }
 
 /* ---------- editor controls ---------- */
 .creator-scroll { flex: 1; overflow-y: auto; }
@@ -648,6 +650,7 @@
 .cc__qritem.is-editable { pointer-events: auto; cursor: grab; touch-action: none; }
 .cc__qritem.is-editable:active { cursor: grabbing; }
 .cc__qritem.is-selected { outline: 1.5px solid var(--accent); outline-offset: 6px; border-radius: 4px; }
+.cc__qritem.is-tappable { pointer-events: auto; cursor: pointer; }
 .cc__qrbox { width: 100%; aspect-ratio: 1 / 1; background: #fff; border-radius: 8px; padding: 7%; box-shadow: 0 3px 10px rgba(0,0,0,.35); display: flex; align-items: center; justify-content: center; }
 .cc__qrbox img { width: 100%; height: 100%; display: block; image-rendering: pixelated; }
 .cc__qrbox .cds-icon { color: #161616; }
@@ -1189,6 +1192,20 @@
   transition: background .15s, transform .12s;
 }
 .card-view__cta:hover { background: rgba(0,0,0,.7); transform: scale(1.03); }
+.card-view__qr-link {
+  position: absolute; bottom: 72px; left: 50%; transform: translateX(-50%); z-index: 20;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 18px; border-radius: 999px; white-space: nowrap;
+  max-width: calc(100% - 48px); overflow: hidden; text-overflow: ellipsis;
+  background: rgba(0,0,0,.52); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,.14);
+  color: var(--accent); font: 600 13px var(--font); text-decoration: none;
+  animation: qrLinkIn .2s var(--ease) both;
+}
+.card-view__qr-link:hover { background: rgba(0,0,0,.7); }
+.card-view__qr-link.is-leaving { animation: qrLinkOut .35s var(--ease) both; pointer-events: none; }
+@keyframes qrLinkIn  { from { opacity: 0; transform: translateX(-50%) translateY(6px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes qrLinkOut { from { opacity: 1; transform: translateX(-50%) translateY(0); } to { opacity: 0; transform: translateX(-50%) translateY(6px); } }
 .card-view__cta .cds-icon { width: 15px; height: 15px; }
 .card-view__header { position: absolute; top: 22px; left: 0; right: 0; z-index: 20;
   display: flex; flex-direction: column; align-items: center; gap: 5px; pointer-events: none; }
@@ -1212,6 +1229,8 @@
 .landing__title-letter__sizer,
 .landing__title-letter__text { grid-area: 1 / 1; }
 .landing__title-letter__sizer { font-variation-settings: 'wght' 800; visibility: hidden; pointer-events: none; }
+.landing__title-star { display: inline-flex; align-items: center; justify-content: center; vertical-align: text-top; margin-top: 10px; margin-right: 6px; cursor: default; user-select: none; }
+.landing__title-star svg { width: 27px; height: 36px; display: block; }
 .landing__sub { font: 400 13px var(--font); color: var(--text-2); }
 @keyframes landingCreditIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .landing__credit { position: absolute; bottom: 14px; left: 16px; z-index: 10;

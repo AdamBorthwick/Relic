@@ -56,11 +56,15 @@ function EditableText({ value, onInput, onDone }) {
 function Collectible({
   image, aspect = 0.72, cutout = false, holo = 'none', fxLevel = 50,
   texts = [], qr = null, selectedId = null, editable = false, mode = 'static',
-  gyro = false,
+  gyro = false, onQrDoubleTap = null,
   onSelectText, onMoveText, onResizeText, onEditText, onBlankClick,
   maxW = 300, maxH = 430,
 }) {
   const tiltRef = useColRef(null);
+  const onQrTap = React.useCallback(() => {
+    if (editable || !qr?.value || !onQrDoubleTap) return;
+    onQrDoubleTap(qr.value);
+  }, [editable, qr, onQrDoubleTap]);
   // continuous finish-effect intensity. The slider midpoint (50, "Balanced") is
   // a moderate look; the bottom is subtle and the top pushes to a vivid finish.
   const fxFilter = (() => {
@@ -161,7 +165,7 @@ function Collectible({
     el.style.setProperty('--my', (py * 100).toFixed(1) + '%');
     el.style.setProperty('--ang', (px * 130).toFixed(0) + 'deg');
     el.style.setProperty('--rx', ((px - 0.5) * 26).toFixed(1) + 'deg');
-    el.style.setProperty('--ry', (-(py - 0.5) * 26).toFixed(1) + 'deg');
+    el.style.setProperty('--ry', (-(py - 0.5) * 42).toFixed(1) + 'deg');
     setBgParallax(((px - 0.5) * -20).toFixed(1) + 'px ' + ((py - 0.5) * -20).toFixed(1) + 'px');
   };
   const pt = (e) => (e.touches ? e.touches[0] : e);
@@ -362,10 +366,11 @@ function Collectible({
             const isSel = editable && selectedId === 'qr';
             const src = qrDataUrl(qr.value || 'https://stub.party');
             return (
-              <div className={'cc__qritem' + (editable ? ' is-editable' : '') + (isSel ? ' is-selected' : '')}
+              <div className={'cc__qritem' + (editable ? ' is-editable' : '') + (isSel ? ' is-selected' : '') + (!editable && onQrDoubleTap ? ' is-tappable' : '')}
                    style={{ left: qr.x + '%', top: qr.y + '%', width: (qr.w || 30) + '%' }}
                    onMouseDown={(e) => { if (editable) startMove(qr)(e); }}
-                   onTouchStart={(e) => { if (editable) startMove(qr)(e); }}>
+                   onTouchStart={(e) => { if (editable) startMove(qr)(e); }}
+                   onClick={onQrTap}>
                 <div className="cc__qrbox">
                   {src ? <img src={src} alt="QR" draggable="false" /> : <span className="cds-icon cds-icon--24" data-icon="qr-code"></span>}
                 </div>
