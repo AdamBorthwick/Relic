@@ -147,6 +147,9 @@ function Collectible({
   const restTimer   = useColRef(null);
   const cardBounds  = useColRef(null); // cached on mouseenter — avoids getBoundingClientRect every move
   const bgElsCache  = useColRef(null); // cached querySelectorAll — avoids DOM query every move
+  const touchTargetRef = useColRef({ px: 0.5, py: 0.5 });
+  const touchSmoothRef = useColRef({ px: 0.5, py: 0.5 });
+  const touchRafRef    = useColRef(null);
   const bgParallaxSel = '.wiz--fx > .cc-bg .cc-bg__field, .wiz--fx > .cc-bg .cc-bg__swirl, .wiz__preview .cc-bg__field, .wiz__preview .cc-bg__swirl, .confirm .cc-bg__field, .confirm .cc-bg__swirl';
   const setBgParallax = (v) => {
     if (!bgElsCache.current) bgElsCache.current = document.querySelectorAll(bgParallaxSel);
@@ -169,6 +172,23 @@ function Collectible({
     setBgParallax(((px - 0.5) * -20).toFixed(1) + 'px ' + ((py - 0.5) * -20).toFixed(1) + 'px');
   };
   const pt = (e) => (e.touches ? e.touches[0] : e);
+
+  const stopTouchRaf = () => {
+    if (touchRafRef.current) { cancelAnimationFrame(touchRafRef.current); touchRafRef.current = null; }
+    const el = tiltRef.current; if (el) el.style.transition = '';
+  };
+  const startTouchRaf = () => {
+    if (touchRafRef.current) return;
+    const el = tiltRef.current; if (el) el.style.transition = 'none';
+    const loop = () => {
+      const s = touchSmoothRef.current, t = touchTargetRef.current;
+      s.px += (t.px - s.px) * 0.12;
+      s.py += (t.py - s.py) * 0.12;
+      tilt(s.px, s.py);
+      touchRafRef.current = requestAnimationFrame(loop);
+    };
+    touchRafRef.current = requestAnimationFrame(loop);
+  };
 
   // Gyroscope — driven by `gyro` prop; parent owns the toggle + permission request.
   const gyroMovingRef = useColRef(false);
@@ -216,6 +236,7 @@ function Collectible({
     const el = tiltRef.current; if (!el) return;
     cardBounds.current = el.getBoundingClientRect();
     bgElsCache.current = document.querySelectorAll(bgParallaxSel);
+    touchSmoothRef.current = { px: 0.5, py: 0.5 }; // reset so lerp starts from center
   };
   const onTiltMove = (e) => {
     if (mode !== 'tilt') return;
@@ -223,11 +244,13 @@ function Collectible({
     if (e.cancelable) e.preventDefault();
     const el = tiltRef.current; if (!el) return; const p = pt(e);
     const r = cardBounds.current || el.getBoundingClientRect();
-    tilt(Math.min(1, Math.max(0, (p.clientX - r.left) / r.width)),
-         Math.min(1, Math.max(0, (p.clientY - r.top) / r.height)));
+    touchTargetRef.current.px = Math.min(1, Math.max(0, (p.clientX - r.left) / r.width));
+    touchTargetRef.current.py = Math.min(1, Math.max(0, (p.clientY - r.top) / r.height));
+    startTouchRaf();
   };
   const onTiltLeave = () => {
     if (gyro && gyroMovingRef.current) return; // gyro is actively driving
+    stopTouchRaf(); // cancel smooth loop, restore CSS transition
     cardBounds.current = null; // invalidate so next enter re-measures
     const el = tiltRef.current; if (!el) return;
     el.classList.remove('is-active');
