@@ -865,7 +865,17 @@ function CardView({ code }) {
   const [state, setState] = useCr(null);
   const [err, setErr]     = useCr(false);
   const { maxW, maxH }    = useCardSize(48);
-  const [tiltHint, setTiltHint] = useCr(!!window.DeviceOrientationEvent);
+  const hasGyro = !!window.DeviceOrientationEvent;
+  const [gyroOn, setGyroOn] = useCr(false);
+  const toggleGyro = async () => {
+    if (gyroOn) { setGyroOn(false); return; }
+    try {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        if ((await DeviceOrientationEvent.requestPermission()) !== 'granted') return;
+      }
+    } catch { return; }
+    setGyroOn(true);
+  };
 
   React.useEffect(() => {
     loadCard(code)
@@ -908,14 +918,13 @@ function CardView({ code }) {
           image={state.photo} aspect={state.aspect || 0.72} cutout={!!state.cutout}
           holo={state.holo || 'none'} fxLevel={state.fxLevel ?? 50}
           texts={state.texts || []} qr={state.qr || null}
-          editable={false} mode="tilt" maxW={maxW} maxH={maxH}
-          onGyroActive={() => setTiltHint(false)}
+          editable={false} mode="tilt" gyro={gyroOn} maxW={maxW} maxH={maxH}
         />
       </div>
-      {tiltHint && (
-        <div className="card-view__tilt-hint">
-          <Icon name="rotate" /> Tap card to enable tilt
-        </div>
+      {hasGyro && (
+        <button className={'card-view__gyro-btn' + (gyroOn ? ' is-on' : '')} onClick={toggleGyro}>
+          <Icon name="rotate" /> {gyroOn ? 'Touch' : 'Gyro'}
+        </button>
       )}
       <a href={location.pathname} className="card-view__cta">
         Create a collectible <Icon name="add" />

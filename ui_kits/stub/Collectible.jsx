@@ -56,8 +56,8 @@ function EditableText({ value, onInput, onDone }) {
 function Collectible({
   image, aspect = 0.72, cutout = false, holo = 'none', fxLevel = 50,
   texts = [], qr = null, selectedId = null, editable = false, mode = 'static',
+  gyro = false,
   onSelectText, onMoveText, onResizeText, onEditText, onBlankClick,
-  onGyroActive,
   maxW = 300, maxH = 430,
 }) {
   const tiltRef = useColRef(null);
@@ -166,25 +166,14 @@ function Collectible({
   };
   const pt = (e) => (e.touches ? e.touches[0] : e);
 
-  // Gyroscope tilt — activated by first tap (user gesture required on all platforms).
-  const gyroActiveRef = useColRef(false);
+  // Gyroscope — driven by `gyro` prop; parent owns the toggle + permission request.
   const gyroMovingRef = useColRef(false);
-  const startGyro = React.useCallback(async () => {
-    if (gyroActiveRef.current || mode !== 'tilt') return;
-    if (!window.DeviceOrientationEvent) return;
-    try {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        if ((await DeviceOrientationEvent.requestPermission()) !== 'granted') return;
-      }
-    } catch { return; }
-    gyroActiveRef.current = true;
-    onGyroActive && onGyroActive();
-    let rafId = null;
-    let latestPx = 0.5, latestPy = 0.5;
+  React.useEffect(() => {
+    if (!gyro || mode !== 'tilt') return;
+    let rafId = null, latestPx = 0.5, latestPy = 0.5;
     const handler = (e) => {
       if (e.gamma === null && e.beta === null) return;
       gyroMovingRef.current = true;
-      // gamma: left-right tilt; beta: front-back, natural hold ≈ 70°, ±35° range
       latestPx = Math.max(0, Math.min(1, ((e.gamma || 0) + 35) / 70));
       latestPy = Math.max(0, Math.min(1, ((e.beta  || 70) - 35) / 70));
       if (rafId) return;
@@ -192,8 +181,7 @@ function Collectible({
     };
     window.addEventListener('deviceorientation', handler, { passive: true });
     return () => { window.removeEventListener('deviceorientation', handler); if (rafId) cancelAnimationFrame(rafId); };
-  }, [mode, onGyroActive]);
-  React.useEffect(() => () => { gyroActiveRef.current = false; gyroMovingRef.current = false; }, []);
+  }, [gyro, mode]);
 
   const onTiltEnter = () => {
     const el = tiltRef.current; if (!el) return;
@@ -202,7 +190,7 @@ function Collectible({
   };
   const onTiltMove = (e) => {
     if (mode !== 'tilt') return;
-    if (e.touches && gyroActiveRef.current) return; // gyro drives it on mobile
+    if (e.touches && gyro) return; // gyro prop drives it on mobile
     if (e.cancelable) e.preventDefault();
     const el = tiltRef.current; if (!el) return; const p = pt(e);
     const r = cardBounds.current || el.getBoundingClientRect();
@@ -210,7 +198,7 @@ function Collectible({
          Math.min(1, Math.max(0, (p.clientY - r.top) / r.height)));
   };
   const onTiltLeave = () => {
-    if (gyroActiveRef.current && gyroMovingRef.current) return; // gyro is actively driving
+    if (gyro && gyroMovingRef.current) return; // gyro is actively driving
     cardBounds.current = null; // invalidate so next enter re-measures
     const el = tiltRef.current; if (!el) return;
     el.classList.remove('is-active');
@@ -321,7 +309,7 @@ function Collectible({
                   '--art-fit': cutout ? 'contain' : 'cover' }}>
       <div className="cc__tilt" ref={tiltRef} style={{ width: sz.width, height: sz.height }}
            onMouseEnter={onTiltEnter} onMouseMove={onTiltMove} onMouseLeave={onTiltLeave}
-           onTouchStart={() => { if (mode === 'tilt') startGyro(); }}
+           onTouchStart={() => {}}
            onTouchMove={onTiltMove} onTouchEnd={onTiltLeave}
            onContextMenu={(e) => e.preventDefault()}>
         <div className="cc__shape" style={shapeStyle}>

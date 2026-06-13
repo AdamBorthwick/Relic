@@ -1161,15 +1161,20 @@
   position: absolute; inset: 0;
   display: flex; align-items: center; justify-content: center;
 }
-.card-view__tilt-hint {
-  position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%);
-  z-index: 20; display: inline-flex; align-items: center; gap: 7px;
-  padding: 8px 16px; border-radius: 999px; white-space: nowrap;
+.card-view__gyro-btn {
+  position: absolute; bottom: 24px; left: 24px; z-index: 20;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px; border-radius: 999px; white-space: nowrap;
   background: rgba(0,0,0,.52); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255,255,255,.14); color: rgba(255,255,255,.8);
-  font: 500 13px var(--font); pointer-events: none;
+  font: 600 13px var(--font); cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
 }
-.card-view__tilt-hint .cds-icon { width: 15px; height: 15px; opacity: .7; }
+.card-view__gyro-btn.is-on {
+  background: rgba(255,255,255,.15);
+  border-color: var(--accent); color: var(--accent);
+}
+.card-view__gyro-btn .cds-icon { width: 15px; height: 15px; }
 .card-view__cta {
   position: absolute; bottom: 24px; right: 24px; z-index: 20;
   display: inline-flex; align-items: center; gap: 6px;
