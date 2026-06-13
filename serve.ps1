@@ -59,7 +59,7 @@ try {
             $line = ($req -split "`r?`n")[0]   # e.g. "GET /path HTTP/1.1"
             if ($line -match '^(GET|HEAD)\s+(\S+)') {
                 $urlPath = $Matches[2] -replace '\?.*','' -replace '/','\' -replace '^\\',''
-                if ($urlPath -eq '' -or $urlPath -eq '\') { $urlPath = 'ui_kits\stub\creator.html' }
+                if ($urlPath -eq '' -or $urlPath -eq '\') { $urlPath = 'index.html' }
                 $filePath = Join-Path $root $urlPath
                 if (Test-Path $filePath -PathType Leaf) {
                     $ext  = [System.IO.Path]::GetExtension($filePath).ToLower()

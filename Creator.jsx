@@ -45,25 +45,29 @@ async function loadCard(code) {
   return rows[0].data;
 }
 async function uploadPreview(blob, code) {
-  const jpegBlob = await new Promise(resolve => {
+  const jpegBlob = await new Promise((resolve, reject) => {
     const img = new Image();
     const src = URL.createObjectURL(blob);
+    img.onerror = reject;
     img.onload = () => {
       const W = 630, H = Math.round(img.height * W / img.width);
       const cv = Object.assign(document.createElement('canvas'), { width: W, height: H });
       cv.getContext('2d').drawImage(img, 0, 0, W, H);
       URL.revokeObjectURL(src);
-      cv.toBlob(resolve, 'image/jpeg', 0.88);
+      cv.toBlob(b => b ? resolve(b) : reject(new Error('toBlob returned null')), 'image/jpeg', 0.88);
     };
     img.src = src;
   });
-  if (!jpegBlob) return;
   const buf = await jpegBlob.arrayBuffer();
-  await fetch(`${SB_URL}/storage/v1/object/previews/${code}.jpg`, {
+  const res = await fetch(`${SB_URL}/storage/v1/object/previews/${code}.jpg`, {
     method: 'POST',
     headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'Content-Type': 'image/jpeg', 'x-upsert': 'true' },
     body: buf,
   });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Storage upload ${res.status}: ${text}`);
+  }
 }
 
 // Dynamic card dimensions — scale down on short/narrow viewports so nothing scrolls.
@@ -487,7 +491,7 @@ function Creator() {
       const url   = location.origin + location.pathname + '#card=' + code;
       history.replaceState(null, '', '#card=' + code);
       setShareUrl(url);
-      makeCardBlob().then(blob => uploadPreview(blob, code)).catch(() => {});
+      makeCardBlob().then(blob => uploadPreview(blob, code)).catch(e => console.error('[Relic] preview upload failed:', e));
     } catch (e) { setShareErr('Save failed — try again'); }
     setShareSaving(false);
   };
