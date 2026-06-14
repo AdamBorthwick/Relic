@@ -316,6 +316,17 @@ function Creator() {
   const [linkLoading, setLinkLoading] = useCr(false);
   const [linkErr, setLinkErr]         = useCr(null);
   const textInputRef = useCrRef(null);
+  const historyRef   = useCrRef([]);  // [{texts, qr}] — undo stack (max 20)
+  const textsRef     = useCrRef(texts);
+  const qrRef        = useCrRef(qr);
+  textsRef.current = texts; // keep refs current every render
+  qrRef.current    = qr;
+
+  const pushHistory = () => {
+    const h = historyRef.current;
+    if (h.length >= 20) h.shift();
+    h.push({ texts: textsRef.current, qr: qrRef.current });
+  };
 
   React.useEffect(() => { if (window.CarbonIcons) window.CarbonIcons.run(); });
 
@@ -369,6 +380,7 @@ function Creator() {
     </TweaksPanel>
   );
   const addText = () => {
+    pushHistory();
     const id = TID++;
     const used = texts.length;
     setTexts([...texts, { id, value: '', color: '#ffffff', align: 'center', size: 28, style: 'regular', w: 64, x: 50, y: 30 + Math.min(used, 4) * 14 }]);
@@ -377,24 +389,41 @@ function Creator() {
     setTimeout(() => textInputRef.current && textInputRef.current.focus(), 30);
   };
   const addQr = () => {
-    if (!qr) setQr({ id: 'qr', value: 'https://www.adamborthwick.com', w: 30, x: 50, y: 66 });
+    if (!qr) { pushHistory(); setQr({ id: 'qr', value: 'https://www.adamborthwick.com', w: 30, x: 50, y: 66 }); }
     setSelId('qr');
   };
-  const updSel = (patch) => setTexts(ts => ts.map(t => t.id === selId ? { ...t, ...patch } : t));
+  const updSel = (patch) => {
+    if (!('value' in patch)) pushHistory();
+    setTexts(ts => ts.map(t => t.id === selId ? { ...t, ...patch } : t));
+  };
   const moveEl = (id, p) => { if (id === 'qr') setQr(q => q && { ...q, ...p }); else setTexts(ts => ts.map(t => t.id === id ? { ...t, ...p } : t)); };
   const resizeEl = (id, p) => { if (id === 'qr') setQr(q => q && { ...q, ...p }); else setTexts(ts => ts.map(t => t.id === id ? { ...t, ...p } : t)); };
   const editText = (id, value) => setTexts(ts => ts.map(t => t.id === id ? { ...t, value } : t));
-  const delSel = () => { if (selId === 'qr') { setQr(null); } else { setTexts(texts.filter(t => t.id !== selId)); } setSelId(null); };
+  const delSel = () => { pushHistory(); if (selId === 'qr') { setQr(null); } else { setTexts(texts.filter(t => t.id !== selId)); } setSelId(null); };
 
   React.useEffect(() => {
-    if (!selId) return;
     const handler = (e) => {
-      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
       const tag = document.activeElement?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      e.preventDefault();
-      if (selId === 'qr') { setQr(null); } else { setTexts(ts => ts.filter(t => t.id !== selId)); }
-      setSelId(null);
+      const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
+      // Ctrl/Cmd+Z — undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        if (inInput) return;
+        e.preventDefault();
+        const h = historyRef.current;
+        if (!h.length) return;
+        const prev = h.pop();
+        setTexts(prev.texts); setQr(prev.qr); setSelId(null);
+        return;
+      }
+      // Delete — remove selected item
+      if (e.key === 'Delete' && selId && !inInput) {
+        e.preventDefault();
+        const h = historyRef.current;
+        if (h.length >= 20) h.shift();
+        h.push({ texts: textsRef.current, qr: qrRef.current });
+        if (selId === 'qr') { setQr(null); } else { setTexts(ts => ts.filter(t => t.id !== selId)); }
+        setSelId(null);
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
