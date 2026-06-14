@@ -454,11 +454,43 @@ function Creator() {
 
     return new Promise(res => cv.toBlob(res, 'image/png'));
   };
-  const downloadBlob = (blob, name) => {
+  const showSaveOverlay = (url) => {
+    const el = document.createElement('div');
+    Object.assign(el.style, { position:'fixed', inset:0, background:'rgba(0,0,0,.9)', zIndex:9999,
+      display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'16px', padding:'24px' });
+    const img = document.createElement('img');
+    img.src = url;
+    Object.assign(img.style, { maxWidth:'90vw', maxHeight:'65vh', borderRadius:'12px', objectFit:'contain' });
+    const msg = document.createElement('p');
+    msg.textContent = 'Hold the image to save it to your photos';
+    Object.assign(msg.style, { color:'#fff', fontSize:'16px', textAlign:'center', margin:0 });
+    const btn = document.createElement('button');
+    btn.textContent = 'Close';
+    Object.assign(btn.style, { color:'rgba(255,255,255,.55)', fontSize:'14px', background:'none', border:'none', padding:'8px 16px', cursor:'pointer' });
+    const close = () => { el.remove(); URL.revokeObjectURL(url); };
+    btn.onclick = close;
+    el.addEventListener('click', e => { if (e.target === el) close(); });
+    el.append(img, msg, btn);
+    document.body.appendChild(el);
+  };
+  const downloadBlob = async (blob, name) => {
+    // Web Share API — native share sheet on iOS/Android (incl. some IABs)
+    if (navigator.share && navigator.canShare) {
+      const file = new File([blob], name, { type: blob.type });
+      if (navigator.canShare({ files: [file] })) {
+        try { await navigator.share({ files: [file] }); return; }
+        catch (e) { if (e.name === 'AbortError') return; }
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    // Instagram/Facebook IAB blocks anchor downloads — show overlay so user can long-press
+    if (/Instagram|FBAN|FBAV/i.test(navigator.userAgent)) {
+      showSaveOverlay(url); return;
+    }
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
+    a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   const loadFromLink = async () => {
     const code = (linkVal.match(/[#&]card=([^&\s]+)/) || [])[1] || linkVal.trim();
@@ -480,7 +512,7 @@ function Creator() {
     setLinkLoading(false);
   };
 
-  const saveImage = async () => { try { downloadBlob(await makeCardBlob(), 'collectible.png'); setShareOpen(false); } catch (e) {} };
+  const saveImage = async () => { try { await downloadBlob(await makeCardBlob(), 'collectible.png'); setShareOpen(false); } catch (e) {} };
   const copyLink = async () => {
     if (shareSaving) return;
     setShareSaving(true); setShareErr(null);
