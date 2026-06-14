@@ -261,7 +261,7 @@ function Creator() {
   const [tw, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const [step, setStep] = useCr(1);
   const [originalSrc, setOriginalSrc] = useCr(null);
-  const [image, setImage] = useCr('paint-marble.png');
+  const [image, setImage] = useCr('assets/textures/paint-marble.png');
   const [aspect, setAspect] = useCr(0.72);
   const [cutout, setCutout] = useCr(false);
   const [editorCut, setEditorCut] = useCr(true);

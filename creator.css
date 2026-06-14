@@ -110,39 +110,39 @@
 .cc-bg--chicot .cc-bg__field, .cc-bg--canio .cc-bg__field {
   inset: -72%; background-position: center; background-size: cover;
   animation: swirlSpin 64s linear infinite, paintHue 26s ease-in-out infinite; }
-.cc-bg--chicot .cc-bg__field { background-image: url('paint-fluid.png');
+.cc-bg--chicot .cc-bg__field { background-image: url('assets/textures/paint-fluid.png');
   animation: swirlSpin 160s linear infinite, paintHue 34s ease-in-out infinite; }
-.cc-bg--canio .cc-bg__field  { background-image: url('paint-canio.png');
+.cc-bg--canio .cc-bg__field  { background-image: url('assets/textures/paint-canio.png');
   animation: swirlSpinR 160s linear infinite, paintHue 38s ease-in-out infinite; }
 /* counter-rotating, blurred echo for liquid depth */
 .cc-bg--chicot .cc-bg__swirl, .cc-bg--canio .cc-bg__swirl {
   inset: -72%; background-position: center; background-size: 150%;
   opacity: .42; mix-blend-mode: screen; filter: blur(9px); transform-origin: 52% 48%;
   animation: swirlSpinR 98s linear infinite; }
-.cc-bg--chicot .cc-bg__swirl { background-image: url('paint-fluid.png');
+.cc-bg--chicot .cc-bg__swirl { background-image: url('assets/textures/paint-fluid.png');
   animation: swirlSpinR 240s linear infinite; }
-.cc-bg--canio .cc-bg__swirl  { background-image: url('paint-canio.png');
+.cc-bg--canio .cc-bg__swirl  { background-image: url('assets/textures/paint-canio.png');
   animation: swirlSpin 240s linear infinite; }
 /* — Stars: a simple scattered star-field on deep navy, with a gentle twinkle. Sized
    a touch larger than the viewport so the card parallax never reveals an edge. — */
 .cc-bg--stars .cc-bg__field { inset: -10%; transform: none; animation: none;
-  background: url('paint-stars.png') center / cover; }
+  background: url('assets/textures/paint-stars.png') center / cover; }
 /* Twinkle: three offset copies of the star field, each fading on its own
    incommensurate cycle and centred on a different cluster — so stars brighten
    and dim at scattered times rather than as one global pulse. Kept subtle
    (small opacity swing per layer; periods 6.1 / 8.7 / 11.3s never re-sync). */
 .cc-bg--stars .cc-bg__swirl { inset: -10%; transform: scaleX(-1);
   mix-blend-mode: screen; filter: none;
-  background: url('paint-stars.png') 30% 40% / 150%;
+  background: url('assets/textures/paint-stars.png') 30% 40% / 150%;
   opacity: .3; animation: starTwinkleA 6.1s ease-in-out infinite; }
 .cc-bg--stars .cc-bg__swirl::before,
 .cc-bg--stars .cc-bg__swirl::after { content: ''; position: absolute; inset: 0;
   mix-blend-mode: screen; }
 .cc-bg--stars .cc-bg__swirl::before {
-  background: url('paint-stars.png') 72% 24% / 168%;
+  background: url('assets/textures/paint-stars.png') 72% 24% / 168%;
   opacity: .26; animation: starTwinkleB 8.7s ease-in-out infinite; }
 .cc-bg--stars .cc-bg__swirl::after {
-  background: url('paint-stars.png') 46% 82% / 184%;
+  background: url('assets/textures/paint-stars.png') 46% 82% / 184%;
   opacity: .24; animation: starTwinkleC 11.3s ease-in-out infinite; }
 @keyframes starTwinkleA { 0%, 100% { opacity: .30; } 35% { opacity: .46; } 70% { opacity: .33; } }
 @keyframes starTwinkleB { 0%, 100% { opacity: .26; } 45% { opacity: .41; } 80% { opacity: .29; } }
@@ -264,7 +264,7 @@
 .cc-bg--loop .cc-bg__field { inset: 0; filter: none; transform: none; animation: none;
   background: radial-gradient(circle at 50% 46%, #f0824a 0%, #e2663c 55%, #cc552e 100%); }
 .cc-bg--loop .cc-bg__swirl { inset: -38%; filter: none; mix-blend-mode: normal; opacity: 1;
-  background: url('paint-rings.png') center / cover; transform-origin: 50% 48%;
+  background: url('assets/textures/paint-rings.png') center / cover; transform-origin: 50% 48%;
   animation: bgSpin 90s linear infinite; }
 /* swatch: show the orange + rings, centred and still */
 .fx-chip__sw .cc-bg--loop .cc-bg__swirl, .scene-prev .cc-bg--loop .cc-bg__swirl {
@@ -275,7 +275,7 @@
 .cc-bg--loopbw .cc-bg__field { inset: 0; filter: none; transform: none; animation: none;
   background: radial-gradient(circle at 50% 46%, #ffffff 0%, #f1f1f4 55%, #e3e3e8 100%); }
 .cc-bg--loopbw .cc-bg__swirl { inset: -38%; filter: none; mix-blend-mode: normal; opacity: 1;
-  background: url('paint-rings-bw.png') center / cover; transform-origin: 50% 48%;
+  background: url('assets/textures/paint-rings-bw.png') center / cover; transform-origin: 50% 48%;
   animation: bgSpin 90s linear infinite; }
 .fx-chip__sw .cc-bg--loopbw .cc-bg__swirl, .scene-prev .cc-bg--loopbw .cc-bg__swirl {
   inset: -20%; display: block; }
@@ -441,7 +441,7 @@
 /* — Polychrome — a warped, flowing holographic film (not a spiral), alpha-masked by
    a luminance copy of the art so the colour catches the bright/white areas — */
 .cc--poly .cc__holo { opacity: .9; mix-blend-mode: screen; filter: saturate(1.5) contrast(1.08) hue-rotate(var(--ang));
-  background: url('holo-warp.png') center / 300%;
+  background: url('assets/textures/holo-warp.png') center / 300%;
   background-position: calc(50% + (var(--gx) - 50%) * 0.6) calc(50% + (var(--gy) - 50%) * 0.6);
   -webkit-mask-image: var(--artmask); mask-image: var(--artmask);
   -webkit-mask-size: var(--art-fit); mask-size: var(--art-fit);
@@ -479,7 +479,7 @@
 /* card surface: a SLIGHT polychrome film, same warped holo as Polychrome, keyed to
    the photo's bright areas so it's a gentle wash rather than a flat overlay */
 .cc--glitter .cc__holo { opacity: .4; mix-blend-mode: screen; filter: saturate(1.4) contrast(1.05) hue-rotate(var(--ang));
-  background: url('holo-warp.png') center / 300%;
+  background: url('assets/textures/holo-warp.png') center / 300%;
   background-position: calc(50% + (var(--gx) - 50%) * 0.6) calc(50% + (var(--gy) - 50%) * 0.6);
   -webkit-mask-image: var(--artmask); mask-image: var(--artmask);
   -webkit-mask-size: var(--art-fit); mask-size: var(--art-fit);
@@ -488,7 +488,7 @@
 /* DEEPER grains — polychromatic (warped holo shown through the grain shapes), a
    different sample, slightly smaller & dimmer, drifting with a very slow parallax */
 .cc--glitter .cc__grain2 { opacity: .82; mix-blend-mode: normal;
-  background: url('holo-warp.png') center / 300%;
+  background: url('assets/textures/holo-warp.png') center / 300%;
   background-position: calc(50% + (var(--gx) - 50%) * 0.6) calc(50% + (var(--gy) - 50%) * 0.6);
   -webkit-mask-image: var(--grain); mask-image: var(--grain);
   -webkit-mask-size: 118%; mask-size: 118%;
@@ -498,7 +498,7 @@
   transform: scale(1.07); }
 /* FRONT grains — white, always visible, floating above with a slow parallax */
 .cc--glitter .cc__sheen { opacity: .95; mix-blend-mode: normal;
-  background: url('glitter.png') center / 150%;
+  background: url('assets/textures/glitter.png') center / 150%;
   filter: drop-shadow(0 1px 2px rgba(0,0,0,.55));
   transform: scale(1.16); }
 /* hover: a rainbow centred on the cursor, shown only through the FRONT grain shapes,
@@ -599,12 +599,12 @@
 .s-none { background: linear-gradient(135deg,#3a3550,#22202e); }
 .s-foil { background: linear-gradient(115deg,#7f9bc4,#e8f0ff 50%,#7f9bc4); }
 .s-holo-rb { background: linear-gradient(115deg,#ff5edf,#7a6cff,#19d3ff,#6dff97,#ffe45e); }
-.s-poly { background: url('holo-warp.png') center / 150%; }
+.s-poly { background: url('assets/textures/holo-warp.png') center / 150%; }
 .s-negative { background: conic-gradient(from 10deg,#1a1f3a,#3a2a6a,#1f4a6a,#2a1f4a,#1a1f3a); }
 .s-gold { background: linear-gradient(115deg,#9a6a1f,#ffe08a 50%,#f3c14b); }
 .s-glitter { background: linear-gradient(135deg,#120d1e,#1c1030,#0e1020); }
 .s-glitter::after { content: ''; position: absolute; inset: 0;
-  background: url('glitter.png') center / 100%; }
+  background: url('assets/textures/glitter.png') center / 100%; }
 
 /* hint */
 .cc-hint { text-align: center; font: 500 12px var(--font); color: var(--text-3); margin: 2px 0 0; display: flex; align-items: center; justify-content: center; gap: 6px; }
