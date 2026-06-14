@@ -2,7 +2,7 @@
 //   1) Photo & shape   2) Text (multiple, draggable)   3) Finish & background
 const { useState: useCr, useRef: useCrRef } = React;
 
-const TEXT_COLORS = ['#ffffff', '#161616', '#c6f24e', '#ff6f61', '#b18cff', '#f6c945', '#57d7e6'];
+const TEXT_COLORS = ['#ffffff', '#d4d4dc', '#71717a', '#161616', '#c6f24e', '#ff6f61', '#b18cff', '#f6c945', '#57d7e6'];
 const ALIGNS = [['left', 'text--align--left'], ['center', 'text--align--center'], ['right', 'text--align--right']];
 const SIZES = [['XS', 10], ['S', 16], ['M', 28], ['L', 44]];
 const STYLES = [['regular', 'Aa'], ['bold', 'Aa'], ['italic', 'Aa']];
@@ -385,6 +385,20 @@ function Creator() {
   const resizeEl = (id, p) => { if (id === 'qr') setQr(q => q && { ...q, ...p }); else setTexts(ts => ts.map(t => t.id === id ? { ...t, ...p } : t)); };
   const editText = (id, value) => setTexts(ts => ts.map(t => t.id === id ? { ...t, value } : t));
   const delSel = () => { if (selId === 'qr') { setQr(null); } else { setTexts(texts.filter(t => t.id !== selId)); } setSelId(null); };
+
+  React.useEffect(() => {
+    if (!selId) return;
+    const handler = (e) => {
+      if (e.key !== 'Delete' && e.key !== 'Backspace') return;
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      e.preventDefault();
+      if (selId === 'qr') { setQr(null); } else { setTexts(ts => ts.filter(t => t.id !== selId)); }
+      setSelId(null);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selId]);
 
   // Rasterize the collectible on a 1080×1920 canvas with scene background.
   const makeCardBlob = async () => {
