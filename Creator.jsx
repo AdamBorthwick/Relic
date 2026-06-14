@@ -315,7 +315,6 @@ function Creator() {
   const [linkVal, setLinkVal]         = useCr('');
   const [linkLoading, setLinkLoading] = useCr(false);
   const [linkErr, setLinkErr]         = useCr(null);
-  const fileRef = useCrRef(null);
   const textInputRef = useCrRef(null);
 
   React.useEffect(() => { if (window.CarbonIcons) window.CarbonIcons.run(); });
@@ -561,11 +560,12 @@ function Creator() {
             <span className="landing__sub">Design and share custom collectibles</span>
           </div>
           <div className="wiz__preview wiz__preview--flat">
-            <button className="upload-hero" onClick={() => fileRef.current.click()}>
+            <label className="upload-hero">
               <Icon name="upload" />
               <span className="upload-hero__title">Upload a photo</span>
               <small>Pick the art for your collectible</small>
-            </button>
+              <input type="file" accept="image/*" onChange={onFile} style={{position:'absolute',inset:0,opacity:0,cursor:'pointer',fontSize:'16px'}} />
+            </label>
             <div className="upload-link-row">
             {!linkOpen ? (
               <button className="upload-link-btn" onClick={() => setLinkOpen(true)}>
@@ -592,7 +592,6 @@ function Creator() {
           <div className="landing__credit">
             Created by <a href="https://www.adamborthwick.com" target="_blank" rel="noopener noreferrer" className="landing__credit-link">Adam Borthwick</a>
           </div>
-          <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: 'none' }} />
           {tweaksUI}
         </div>
       );
@@ -601,10 +600,9 @@ function Creator() {
       <React.Fragment>
         <ImageEditor src={originalSrc} initialCutout={editorCut} title="Photo & shape" doneLabel="Next" step={1}
           maxW={PREVIEW_W} maxH={PREVIEW_H}
-          onReplace={() => fileRef.current.click()}
+          onReplaceFile={onFile}
           onCancel={() => { setOriginalSrc(null); setImage(null); }}
           onDone={(url, _r, cut) => { setEditorCut(cut); applyImage(url, cut); }} />
-        <input ref={fileRef} type="file" accept="image/*" onChange={onFile} style={{ display: 'none' }} />
         {tweaksUI}
       </React.Fragment>
     );

@@ -50,7 +50,7 @@ const IE_RATIOS = [
   { id: 'story',    label: 'Story 9:16', r: 9 / 16 },
 ];
 
-function ImageEditor({ src, initialCutout = true, title = 'Adjust photo', doneLabel = 'Done', step = 0, maxW = 290, maxH = 404, onReplace, onCancel, onDone }) {
+function ImageEditor({ src, initialCutout = true, title = 'Adjust photo', doneLabel = 'Done', step = 0, maxW = 290, maxH = 404, onReplaceFile, onCancel, onDone }) {
   const [nat, setNat] = useIE({ w: 1, h: 1 });
   const [ratioId, setRatioId] = useIE('card');
   const [rot, setRot] = useIE(0);
@@ -221,10 +221,11 @@ function ImageEditor({ src, initialCutout = true, title = 'Adjust photo', doneLa
         </div>
 
         <div className="imed__row">
-          {onReplace && (
-            <button className="imed__btn imed__btn--replace" onClick={onReplace}>
+          {onReplaceFile && (
+            <label className="imed__btn imed__btn--replace" style={{position:'relative',overflow:'hidden'}}>
               <Icon name="image" /> Replace image
-            </button>
+              <input type="file" accept="image/*" onChange={onReplaceFile} style={{position:'absolute',inset:0,opacity:0,cursor:'pointer',fontSize:'16px'}} />
+            </label>
           )}
         </div>
       </div>
